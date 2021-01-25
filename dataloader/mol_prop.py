@@ -82,6 +82,9 @@ class DataLoaderMP(DataLoader):
                 invalid_idx.append(i)
                 print(f"Invalid SMILES at position {i+1}: {self.features[i]}")
 
+        if not invalid_idx:
+            print("All SMILES are valid.")
+
         if drop:
             self.features = np.delete(self.features, invalid_idx).tolist()
             self.labels = np.delete(self.labels, invalid_idx)
