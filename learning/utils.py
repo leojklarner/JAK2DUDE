@@ -5,43 +5,69 @@ A script containing utility functions.
 from dataloader import DataLoaderMP
 import pandas as pd
 import os
+import re
 import numpy as np
 
 
-def loadjak2(path_to_root):
+def load(path_to_root, target):
     """
-    A function to load the ligands and decoys for JAK2
-
+    Loads SMILES and affinity data from the specified csv files.
     Args:
-        path_to_root: path to the root of the repository
+        path_to_root: path to the repository root
+        target: choose between ['all', 'kinase', list if ID's],
+        specifies whether to load the ligands for all targets,
+        only the kinases or only the specified targets
 
-    Returns: a dataloader object with the respective features
-    and labels
+    Returns: either a dataloader object or a dataframe
 
     """
 
-    # get DUD-E JAK2 file paths
-    active_name = "jak2_actives_final.ism"
-    decoy_name = "jak2_decoys_final.ism"
+    def add_to_df(dataframe, filename, targetname):
+        """Auxiliary function to concatenate read-in data to the main DataFrame
+        Args:
+            dataframe: the dataframe to which to add the read-in data
+            filename: name of the file being read in
+            targetname: the name of the target
+        Returns:
+            The augmented DataFrame
+        """
+        tempDataFrame = pd.read_csv(os.path.join(datadir, 'chembl_data', filename))
+        tempDataFrame['target'] = [targetname] * len(tempDataFrame.index)
+        return pd.concat([dataframe, tempDataFrame], ignore_index=True)
 
-    datadir = os.path.join(path_to_root, "data")
+    # navigate to directory containing the extracted ligands
+    datadir = os.path.join(path_to_root, 'data')
 
-    active_path = os.path.join(datadir, active_name)
-    decoy_path = os.path.join(datadir, decoy_name)
+    # load the names of the DUD-E kinases, if specified
+    if target == 'kinase':
+        with open(os.path.join(datadir, 'kinase_targets.txt')) as file:
+            kinase_targets = [kinase.strip('\n') for kinase in file.readlines()]
 
-    # read the SMILES into a dataframe
-    actives = pd.read_csv(active_path, sep=' ', header=None).iloc[:, 0].tolist()
-    decoys = pd.read_csv(decoy_path, sep=' ', header=None).iloc[:len(actives ), 0].tolist()
+    # initialise empty DataFrame for results
+    results = pd.DataFrame()
 
-    # create labels where actives are class 1 and decoys class 0
-    labels = np.concatenate((np.ones(len(actives)), np.zeros(len(decoys))))
+    # iterate through each csv in the target directory
+    for csv in os.listdir(os.path.join(datadir, 'chembl_data')):
 
-    # initialise the data loader
-    loader = DataLoaderMP()
-    loader.features = actives + decoys
-    loader.labels = labels
+        # extract target names
+        pattern = re.compile(r'(.*)_extracted_chembl_data.csv')
+        name = re.findall(pattern, csv)[0]
 
-    # check that all smiles are valid
-    #loader.validate()
+        # append read-in data to results data frame,
+        # depending on which option was specified
+        if target == "all":
+            results = add_to_df(results, csv, name)
+        elif target == "kinase" and name in kinase_targets:
+            results = add_to_df(results, csv, name)
+        elif isinstance(target, list) and name in target:
+            results = add_to_df(results, csv, name)
 
-    return loader
+    if results.empty:
+        print("Could not retrieve results. Please check that you specified the target"
+              "as 'all', 'kinase' or a list of target names used in DUD-E.")
+
+    return results
+
+if __name__ == '__main__':
+    res = load(os.path.dirname(os.getcwd()), 'kinase')
+    print(res)
