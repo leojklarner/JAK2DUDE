@@ -7,6 +7,7 @@ from abc import ABCMeta, abstractmethod
 
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 
 class DataLoader(metaclass=ABCMeta):
@@ -105,7 +106,7 @@ class DataLoader(metaclass=ABCMeta):
         """
 
         # reshape labels
-        self.labels = self.labels.reshape(-1, 1)
+        #self.labels = self.labels.reshape(-1, 1)
 
         # define splitter
         if kfold_shuffle:
@@ -120,11 +121,15 @@ class DataLoader(metaclass=ABCMeta):
 
         splits = []
 
+        # convert features from SMILES list into numpy array
+        self.features = np.array(self.features)
+
         for train_index, test_index in splitter.split(self.features, self.labels):
             X_train = self.features[train_index]
             X_test = self.features[test_index]
             y_train = self.labels[train_index]
             y_test = self.labels[test_index]
+
 
             # scale features, if requested
             if scale_features:
@@ -138,7 +143,7 @@ class DataLoader(metaclass=ABCMeta):
             else:
                 labels_out = y_train, y_test, None
 
-            splits.append([features_out + labels_out])
+            splits.append(features_out + labels_out)
 
         # return list of concatenated tuples for each split
         return splits

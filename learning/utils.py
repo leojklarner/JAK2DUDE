@@ -31,7 +31,7 @@ def loadjak2(path_to_root):
 
     # read the SMILES into a dataframe
     actives = pd.read_csv(active_path, sep=' ', header=None).iloc[:, 0].tolist()
-    decoys = pd.read_csv(decoy_path, sep=' ', header=None).iloc[:, 0].tolist()
+    decoys = pd.read_csv(decoy_path, sep=' ', header=None).iloc[:len(actives ), 0].tolist()
 
     # create labels where actives are class 1 and decoys class 0
     labels = np.concatenate((np.ones(len(actives)), np.zeros(len(decoys))))
