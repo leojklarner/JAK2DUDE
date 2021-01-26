@@ -66,8 +66,16 @@ def load(path_to_root, target):
         print("Could not retrieve results. Please check that you specified the target"
               "as 'all', 'kinase' or a list of target names used in DUD-E.")
 
-    return results
+    #return results
+
+    loader = DataLoaderMP()
+    loader.features = results['canonical_smiles'].to_list()
+    loader.labels = results["pchembl_value"].to_numpy()
+
+    #loader.validate()
+
+    return loader
 
 if __name__ == '__main__':
     res = load(os.path.dirname(os.getcwd()), 'kinase')
-    print(res)
+
