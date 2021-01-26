@@ -5,7 +5,7 @@ type validation and feature extraction functionalities.
 
 from abc import ABCMeta, abstractmethod
 
-from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
+from sklearn.model_selection import KFold, StratifiedKFold, StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
@@ -110,7 +110,7 @@ class DataLoader(metaclass=ABCMeta):
 
         # define splitter
         if kfold_shuffle:
-            splitter = StratifiedKFold(
+            splitter = KFold(
                 n_splits=num_splits, shuffle=True
             )
 

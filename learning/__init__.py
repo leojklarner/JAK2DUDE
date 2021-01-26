@@ -1,3 +1,3 @@
-from .utils import loadjak2
+from .utils import load
 
-__all__ = ["loadjak2"]
+__all__ = ["load"]

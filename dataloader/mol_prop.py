@@ -125,7 +125,7 @@ class DataLoaderMP(DataLoader):
 
             # descList[115:] contains fragment-based features only
             # (https://www.rdkit.org/docs/source/rdkit.Chem.Fragments.html)
-            fragments = {d[0]: d[1] for d in Descriptors.descList[115:]}
+            fragments = {d[0]: d[1] for d in Descriptors.descList[123:]}
             frags = np.zeros((len(self.features), len(fragments)))
             for i in range(len(self.features)):
                 mol = MolFromSmiles(self.features[i])
