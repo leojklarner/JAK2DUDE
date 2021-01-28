@@ -68,6 +68,15 @@ def load(path_to_root, target):
 
     # drop entries for which there is no pChEMBL entry
     results = results[['canonical_smiles', 'pchembl_value']].dropna()
+    print(len(results.index))
+
+    # take the average for all duplicate values
+    results = results.groupby('canonical_smiles').mean().reset_index()
+    print(len(results.index))
+
+    # store extracted molecules in file
+    results.to_csv(os.path.join(path_to_root, 'external', 'chemical_vae', 'models', 'kinases', 'kinases_clean.csv'),
+                   index=False)
 
     #return results
 
@@ -81,4 +90,5 @@ def load(path_to_root, target):
 
 if __name__ == '__main__':
     res = load(os.path.dirname(os.getcwd()), 'kinase')
+
     print("")

@@ -15,7 +15,7 @@ path_to_root = os.path.dirname(os.path.dirname(os.getcwd()))
 loader = load(path_to_root, ['jak2'])
 
 # calculate EC fingerprints
-loader.featurize('fingerprints')
+loader.featurize('fragprints')
 
 # get cross-validation splits
 splits = loader.split_and_scale(kfold_shuffle=True, num_splits=3, scale_labels=False)
